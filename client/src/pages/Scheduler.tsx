@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { dummyPostsData, PLATFORMS } from "../assets/assets";
+import { PLATFORMS } from "../assets/assets";
 import { ArrowRightIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, SendIcon, Upload, XIcon } from "lucide-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const Scheduler = () => {
     const [posts, setPosts] = useState<any[]>([]);
@@ -12,16 +14,17 @@ const Scheduler = () => {
     const [loading, setLoading] = useState(false);
 
     const fetchPosts = async () => {
-        setPosts(dummyPostsData);
+        try {
+            const { data } = await api.get("/api/posts");
+            setPosts(data);
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || error?.message)
+        }
     };
 
     useEffect(() => {
         (async () => await fetchPosts())();
-
-        const interval = setInterval(async () => {
-            await fetchPosts();
-        }, 1000);
-
+        const interval = setInterval(async () => { await fetchPosts(); }, 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -32,11 +35,52 @@ const Scheduler = () => {
 
     const handleSchedule = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            setPosts((prev) => [...prev, dummyPostsData[0]]);
-        }, 1000);
+        if (selectedPlatforms.length === 0) {
+            toast.error("Select at least one platform");
+            return;
+        }
+        if (!scheduledDate || !scheduledTime) {
+            toast.error("Select data and time");
+            return;
+        }
+        if (selectedPlatforms.includes('instagram') && !mediaFile) {
+            toast.error("Instagram required an image or video")
+            return;
+        }
+
+        const scheduledFor = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+        const formData = new FormData();
+        formData.append("content", content);
+        formData.append("scheduledFor", scheduledFor);
+        formData.append("status", "scheduled");
+        formData.append("platforms", JSON.stringify(selectedPlatforms));
+        if (mediaFile) formData.append("media", mediaFile);
+
+        // #region agent log
+        fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'Scheduler.tsx:handleSchedule:pre',message:'submitting schedule request',data:{scheduledFor,scheduledDate,scheduledTime,platforms:selectedPlatforms,hasMedia:!!mediaFile,contentLength:content.length},timestamp:Date.now(),hypothesisId:'A,B'})}).catch(()=>{});
+        // #endregion
+
+        setLoading(true)
+        try {
+            await api.post("/api/posts", formData)
+            // #region agent log
+            fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'Scheduler.tsx:handleSchedule:success',message:'schedule request succeeded',data:{scheduledFor},timestamp:Date.now(),hypothesisId:'A,B,C,D',runId:'post-fix'})}).catch(()=>{});
+            // #endregion
+            toast.success("Post scheduled!");
+            setContent("");
+            setScheduledDate("");
+            setScheduledTime("");
+            setSelectedPlatforms([]);
+            setMediaFile(null);
+            fetchPosts();
+        } catch (error: any) {
+            // #region agent log
+            fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'Scheduler.tsx:handleSchedule:error',message:'schedule request failed',data:{status:error?.response?.status,errorMessage:error?.response?.data?.message||error?.message},timestamp:Date.now(),hypothesisId:'A,C,D'})}).catch(()=>{});
+            // #endregion
+            toast.error(error?.response?.data?.message || error?.message)
+        } finally {
+            setLoading(false)
+        }
     };
 
     return (
