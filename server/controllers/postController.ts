@@ -2,9 +2,18 @@ import { Response } from "express";
 import { AuthRequest } from "../middlewares/authMiddleware.js";
 import { GoogleGenAI } from "@google/genai";
 import axios from "axios";
+import { appendFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { cloudinary } from "../config/cloudinary.js";
 import { Generation } from "../models/Generation.js";
 import { Post } from "../models/Post.js";
+import { uploadMediaFile } from "../utils/mediaUpload.js";
+
+const DEBUG_LOG_PATH = join(dirname(fileURLToPath(import.meta.url)), "../../debug-b6a79a.log");
+const debugLog = (location: string, message: string, data: object, hypothesisId: string, runId = "initial") => {
+    try { appendFileSync(DEBUG_LOG_PATH, JSON.stringify({ sessionId: "b6a79a", location, message, data, timestamp: Date.now(), hypothesisId, runId }) + "\n"); } catch {}
+};
 
 
 // Helper to poll Leonardo.ai
@@ -164,6 +173,12 @@ export const getPosts = async (req: AuthRequest, res: Response): Promise<void> =
 export const schedulePost = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
        const { content, platforms, scheduledFor, status } = req.body;
+
+       // #region agent log
+       const hasCloudinary = !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+       debugLog('postController.ts:schedulePost:entry', 'schedulePost received', { bodyKeys: Object.keys(req.body || {}), contentPresent: !!content, platformsType: typeof platforms, platformsValue: platforms, scheduledFor, status, hasFile: !!req.file, fileField: req.file?.fieldname, fileSize: req.file?.size, fileMime: req.file?.mimetype, hasCloudinary, contentType: req.headers['content-type'] }, 'A,D');
+       fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'postController.ts:schedulePost:entry',message:'schedulePost received',data:{bodyKeys:Object.keys(req.body||{}),contentPresent:!!content,hasFile:!!req.file,fileSize:req.file?.size,hasCloudinary},timestamp:Date.now(),hypothesisId:'A,D'})}).catch(()=>{});
+       // #endregion
        
        // Parse platforms if it comes as a stringified array from FormData
        let parsedPlatforms = platforms;
@@ -179,16 +194,19 @@ export const schedulePost = async (req: AuthRequest, res: Response): Promise<voi
        let mediaType: "image" | "video" | undefined = req.body.mediaType;
 
        if (req.file) {
-        const result = await new Promise<any>((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream({resource_type: "auto", folder: "social-scheduler"}, (error, result) => {
-                if (error) reject(error);
-                else resolve(result)
-            });
-            stream.end(req.file!.buffer);
-        })
-        mediaUrl =  result.secure_url;
-        mediaType = result.resource_type === "video" ? "video" : "image";
+        const uploaded = await uploadMediaFile(req.file);
+        mediaUrl = uploaded.mediaUrl;
+        mediaType = uploaded.mediaType;
+        // #region agent log
+        debugLog('postController.ts:schedulePost:mediaUploaded', 'media upload complete', { storage: uploaded.storage, mediaType, hasMediaUrl: !!mediaUrl }, 'A,E');
+        fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'postController.ts:schedulePost:mediaUploaded',message:'media upload complete',data:{storage:uploaded.storage,mediaType,hasMediaUrl:!!mediaUrl},timestamp:Date.now(),hypothesisId:'A,E',runId:'post-fix'})}).catch(()=>{});
+        // #endregion
        }
+
+       // #region agent log
+       debugLog('postController.ts:schedulePost:preCreate', 'about to create post', { parsedPlatforms, mediaUrl: !!mediaUrl, mediaType, scheduledFor, status }, 'B,C');
+       fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'postController.ts:schedulePost:preCreate',message:'about to create post',data:{parsedPlatforms,mediaUrl:!!mediaUrl,mediaType,scheduledFor,status},timestamp:Date.now(),hypothesisId:'B,C'})}).catch(()=>{});
+       // #endregion
 
        const post = await Post.create({
         user: req.user._id,
@@ -199,8 +217,16 @@ export const schedulePost = async (req: AuthRequest, res: Response): Promise<voi
         scheduledFor,
         status
        })
+       // #region agent log
+       debugLog('postController.ts:schedulePost:success', 'post created', { postId: String(post._id), status: post.status, scheduledFor: post.scheduledFor, mediaUrl: !!post.mediaUrl, mediaType: post.mediaType }, 'B,C,D');
+       fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'postController.ts:schedulePost:success',message:'post created',data:{postId:String(post._id),status:post.status,mediaUrl:!!post.mediaUrl,mediaType:post.mediaType},timestamp:Date.now(),hypothesisId:'B,C,D',runId:'post-fix'})}).catch(()=>{});
+       // #endregion
        res.status(201).json(post)
     } catch (error: any) {
+        // #region agent log
+        debugLog('postController.ts:schedulePost:error', 'schedulePost failed', { errorMessage: error?.message, errorName: error?.name }, 'A,C,D');
+        fetch('http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b6a79a'},body:JSON.stringify({sessionId:'b6a79a',location:'postController.ts:schedulePost:error',message:'schedulePost failed',data:{errorMessage:error?.message,errorName:error?.name},timestamp:Date.now(),hypothesisId:'A,C,D'})}).catch(()=>{});
+        // #endregion
         res.status(500).json({ message: error?.message || "Server error" }); 
     }
 }

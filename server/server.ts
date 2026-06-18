@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express, { NextFunction, Request, Response } from 'express';
 import cors from "cors";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import authRouter from "./routes/authRoutes.js";
 import socialAuthRouter from "./routes/socialAuthRoutes.js";
@@ -17,6 +19,7 @@ await connectDB()
 // Middleware
 app.use(cors())
 app.use(express.json());
+app.use("/uploads", express.static(join(dirname(fileURLToPath(import.meta.url)), "uploads")));
 
 const port = process.env.PORT || 3000;
 

@@ -3,6 +3,17 @@ import { Post } from "../models/Post.js";
 import { Account } from "../models/Account.js";
 import zernio from "../config/zernio.js";
 import { ActivityLog } from "../models/ActivityLog.js";
+import { resolvePublicMediaUrl } from "../utils/zernioMediaUpload.js";
+
+const schedulerDebugLog = (location: string, message: string, data: object, hypothesisId: string) => {
+    // #region agent log
+    fetch("http://127.0.0.1:7528/ingest/672da1b7-1ec2-4b96-b90f-08a26a88d868", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "b6a79a" },
+        body: JSON.stringify({ sessionId: "b6a79a", location, message, data, timestamp: Date.now(), hypothesisId, runId: "publish-fix" }),
+    }).catch(() => {});
+    // #endregion
+};
 
 export const initScheduler = () => {
     cron.schedule("* * * * *", async () => {
@@ -28,14 +39,27 @@ export const initScheduler = () => {
                         accountId: acc.zernioAccountId!
                     }))
 
+                    let mediaUrl = post.mediaUrl;
+                    if (mediaUrl) {
+                        mediaUrl = await resolvePublicMediaUrl(mediaUrl, post.mediaType || "image");
+                        if (mediaUrl !== post.mediaUrl) {
+                            post.mediaUrl = mediaUrl;
+                            await post.save();
+                        }
+                    }
+
                     const payload = {
                         content: post.content,
                         publishNow: true,
-                        ...(post.mediaUrl ? {mediaItems: [{type: post.mediaType || "image", url: post.mediaUrl}]} : {}),
+                        ...(mediaUrl ? {mediaItems: [{type: post.mediaType || "image", url: mediaUrl}]} : {}),
                         platforms: zernioPlatforms,
                     }
 
-                    console.log(`Publishing post ${post._id} to Zernio with media: ${post.mediaUrl || "none"}`)
+                    // #region agent log
+                    schedulerDebugLog("schedulerService.ts:publish", "publishing post to Zernio", { postId: String(post._id), mediaUrl, mediaType: post.mediaType || "image" }, "G,H");
+                    // #endregion
+
+                    console.log(`Publishing post ${post._id} to Zernio with media: ${mediaUrl || "none"}`)
 
                     const response = await zernio.posts.createPost({
                         body: payload
@@ -60,6 +84,9 @@ export const initScheduler = () => {
                     })
                     
                 } catch (err: any) {
+                    // #region agent log
+                    schedulerDebugLog("schedulerService.ts:publish:error", "publish failed", { postId: String(post._id), errorMessage: err?.response?.data?.message || err?.message }, "G,H");
+                    // #endregion
                     console.error(`Failed to publish post ${post._id} :`, err?.response?.data || err?.message);
                     post.status = "failed";
                     await post.save()

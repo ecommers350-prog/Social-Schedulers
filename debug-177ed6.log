@@ -1,0 +1,22 @@
+{"sessionId":"177ed6","location":"authController:register:start","message":"Register request received","data":{"hasEmail":true,"hasName":true},"timestamp":1781798889586,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:register:success","message":"User registered","data":{"userId":"6a3417e9f701e019552ef436"},"timestamp":1781798889884,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:start","message":"Login request received","data":{"hasEmail":true},"timestamp":1781798938693,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:success","message":"Login successful","data":{"userId":"6a3417e9f701e019552ef436"},"timestamp":1781798938858,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:start","message":"Login request received","data":{"hasEmail":true},"timestamp":1781799007004,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:invalid","message":"Invalid credentials","data":{"userFound":true},"timestamp":1781799007255,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:start","message":"Login request received","data":{"hasEmail":true},"timestamp":1781799189090,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:invalid","message":"Invalid credentials","data":{"userFound":false},"timestamp":1781799189192,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:register:start","message":"Register request received","data":{"hasEmail":true,"hasName":true},"timestamp":1781799194707,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:register:success","message":"User registered","data":{"userId":"6a34191af701e019552ef437"},"timestamp":1781799195080,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:start","message":"Login request received","data":{"hasEmail":true},"timestamp":1781799236409,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:success","message":"Login successful","data":{"userId":"6a34191af701e019552ef437"},"timestamp":1781799236646,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:register:start","message":"Register request received","data":{"hasEmail":true,"hasName":true},"timestamp":1781802572597,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:register:success","message":"User registered","data":{"userId":"6a34264c472a6f98a07ee8ed"},"timestamp":1781802572827,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:start","message":"Login request received","data":{"hasEmail":true},"timestamp":1781802572838,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:success","message":"Login successful","data":{"userId":"6a34264c472a6f98a07ee8ed"},"timestamp":1781802572978,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:start","message":"Login request received","data":{"hasEmail":true},"timestamp":1781803453994,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:invalid","message":"Invalid credentials","data":{"userFound":false},"timestamp":1781803454131,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:register:start","message":"Register request received","data":{"hasEmail":true,"hasName":true},"timestamp":1781803454144,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:register:success","message":"User registered","data":{"userId":"6a3429be2afe2dc6cd2dd863"},"timestamp":1781803454550,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:start","message":"Login request received","data":{"hasEmail":true},"timestamp":1781803937302,"hypothesisId":"B"}
+{"sessionId":"177ed6","location":"authController:login:success","message":"Login successful","data":{"userId":"6a3429be2afe2dc6cd2dd863"},"timestamp":1781803937435,"hypothesisId":"B"}

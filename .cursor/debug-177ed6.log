@@ -1,0 +1,8 @@
+{"sessionId":"177ed6","location":"AuthContext.tsx:hydrate","message":"Auth hydration complete","data":{"hadStoredUser":false,"hadStoredToken":false},"timestamp":1781799105601,"hypothesisId":"E","runId":"post-fix"}
+{"sessionId":"177ed6","location":"AuthContext.tsx:hydrate","message":"Auth hydration complete","data":{"hadStoredUser":false,"hadStoredToken":false},"timestamp":1781799105604,"hypothesisId":"E","runId":"post-fix"}
+{"sessionId":"177ed6","location":"AuthContext.tsx:hydrate","message":"Auth hydration complete","data":{"hadStoredUser":true,"hadStoredToken":true},"timestamp":1781799151299,"hypothesisId":"E","runId":"post-fix"}
+{"sessionId":"177ed6","location":"AuthContext.tsx:hydrate","message":"Auth hydration complete","data":{"hadStoredUser":true,"hadStoredToken":true},"timestamp":1781799151300,"hypothesisId":"E","runId":"post-fix"}
+{"sessionId":"177ed6","location":"AuthContext.tsx:hydrate","message":"Auth hydration complete","data":{"hadStoredUser":true,"hadStoredToken":true},"timestamp":1781799153551,"hypothesisId":"E","runId":"post-fix"}
+{"sessionId":"177ed6","location":"AuthContext.tsx:hydrate","message":"Auth hydration complete","data":{"hadStoredUser":true,"hadStoredToken":true},"timestamp":1781799153553,"hypothesisId":"E","runId":"post-fix"}
+{"sessionId":"177ed6","location":"Sidebar.tsx:handleLogout:after","message":"Sign out complete","data":{"hadStoredTokenAfter":false},"timestamp":1781799156417,"hypothesisId":"E","runId":"post-fix"}
+{"sessionId":"177ed6","location":"Sidebar.tsx:handleLogout","message":"Sign out clicked","data":{"hadStoredTokenBefore":true},"timestamp":1781799156416,"hypothesisId":"E","runId":"post-fix"}
