@@ -49,6 +49,7 @@ export const generatePost = async (req: AuthRequest, res: Response): Promise<voi
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
             res.status(400).json({ message: "Gemini API Key is missing. Please add it to your server/.env file." })
+            return;
         }
 
         const ai = new GoogleGenAI({ apiKey });
@@ -69,16 +70,16 @@ export const generatePost = async (req: AuthRequest, res: Response): Promise<voi
             const rawText = textResponse.text || "";
             const jsonMatch = rawText.match(/\{[\s\S]*\}/)
             const data = jsonMatch ? JSON.parse(jsonMatch[0]) : { content: rawText, imagePrompt: prompt };
-            content: data.content;
-            imagePrompt: data.imagePrompt;
+            content = data.content;
+            imagePrompt = data.imagePrompt;
         } catch (error) {
-            content: textResponse.text || ""
+            content = textResponse.text || ""
         }
 
         let mediaUrl = "";
         if (generateImage) {
             try {
-                const leonardoKey = process.env.GEMINI_API_KEY;
+                const leonardoKey = process.env.LEONARDO_API_KEY;
                 if (leonardoKey) {
                     // Use Leonardo.ai for image generation
                     const leoResponse = await axios.post(
@@ -178,9 +179,9 @@ export const schedulePost = async (req: AuthRequest, res: Response): Promise<voi
        let mediaType: "image" | "video" | undefined = req.body.mediaType;
 
        if (req.file) {
-        const result = await new Promise<any>((resolve, rejuct) => {
+        const result = await new Promise<any>((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream({resource_type: "auto", folder: "social-scheduler"}, (error, result) => {
-                if (error) rejuct(error);
+                if (error) reject(error);
                 else resolve(result)
             });
             stream.end(req.file!.buffer);
